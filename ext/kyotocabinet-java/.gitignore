@@ -1,1 +1,4 @@
 autom4te.cache/*
+Makefile
+config.status
+config.tmp

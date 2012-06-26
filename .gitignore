@@ -48,3 +48,6 @@ pkg
 
 # For rubinius:
 #*.rbc
+
+# extensions built for testing
+test_ext/*
