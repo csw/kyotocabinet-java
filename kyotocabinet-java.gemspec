@@ -11,7 +11,8 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  gem.extensions    = ["ext/kyotocabinet-java/configure"]
   gem.name          = "kyotocabinet-java"
   gem.require_paths = ["lib"]
-  gem.version       = Kyotocabinet::Java::VERSION
+  gem.version       = KyotoCabinet::Java::VERSION
 end
