@@ -65,6 +65,14 @@ examples. Feel free to submit pull requests.
 [BioRuby MAF parser]: https://github.com/csw/bioruby-maf
 [kyotocabinet.rb]: https://github.com/csw/kyotocabinet-java/blob/master/lib/kyotocabinet.rb
 
+Installation has been tested on Mac OS X 10.7.4 and Debian wheezy, and
+should work on Ubuntu and Fedora as well. Please report build problems
+on other Unix platforms; it should be fairly easy to resolve them.
+
+It's not completely clear what it would take to make this work on
+Windows; shipping a pre-built JAR and the binary DLL provided by FAL
+Labs might do it. Patches would be welcome.
+
 ## Contributing to kyotocabinet-java
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
