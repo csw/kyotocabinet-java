@@ -16,7 +16,7 @@ Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name = "kyotocabinet-java"
   gem.homepage = "http://github.com/csw/kyotocabinet-java"
-  gem.license = "MIT"
+  gem.license = "GPL"
   gem.summary = %Q{Kyoto Cabinet Java library for JRuby}
   gem.description = %Q{Wrapper for Kyoto Cabinet's Java library for use with JRuby, to provide the same interface as the native kyotocabinet-ruby gem for MRI.}
   gem.email = "cswh@umich.edu"
