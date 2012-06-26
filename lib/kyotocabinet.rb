@@ -24,7 +24,7 @@ unless Java.const_defined? :Kyotocabinet
   # need to require kyotocabinet.jar
   soname = java.lang.System.mapLibraryName("jkyotocabinet")
   jdir = $LOAD_PATH.find { |d| File.exist? "#{d}/kyotocabinet.jar" }
-  raise "Could not find kyotocabinet.jar on $LOAD_PATH!" unless jdir
+  raise "Could not find kyotocabinet.jar on $LOAD_PATH (#{$LOAD_PATH.join(':')})!" unless jdir
   sopath = "#{jdir}/#{soname}"
   unless File.exist? sopath
     raise "JNI library #{soname} not installed in #{jdir}!"
