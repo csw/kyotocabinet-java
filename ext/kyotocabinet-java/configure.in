@@ -1,0 +1,295 @@
+# Source of configuration for Kyoto Cabinet for Java
+
+
+
+#================================================================
+# Generic Settings
+#================================================================
+
+# Package name
+AC_INIT(kyotocabinet-java, 1.24)
+
+# Package information
+MYLIBVER=1
+MYLIBREV=1
+
+# Targets
+MYJARFILES="kyotocabinet.jar"
+MYJAVAFILES="Loader.java Utility.java Error.java Visitor.java FileProcessor.java"
+MYJAVAFILES="$MYJAVAFILES Cursor.java DB.java MapReduce.java ValueIterator.java Test.java"
+MYLIBRARYFILES=""
+MYLIBOBJFILES="kyotocabinet.o"
+
+# Building flags
+MYJAVACFLAGS="-d ."
+MYJAVADOCFLAGS="-locale en -tag note:a:"Note:" -nodeprecated -nohelp -quiet -noqualifier all"
+MYJAVARUNFLAGS="-cp kyotocabinet.jar"
+MYCXXFLAGS="-Wall -fPIC -fsigned-char -O2"
+MYCPPFLAGS="-I. -I\$(INCLUDEDIR) -I$HOME/include -I/usr/local/include -DNDEBUG"
+MYLDFLAGS="-L. -L\$(LIBDIR) -L$HOME/lib -L/usr/local/lib"
+MYRUNPATH="\$(LIBDIR)"
+MYLDLIBPATHENV="LD_LIBRARY_PATH"
+
+# Building paths
+pathtmp="$PATH"
+PATH="$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
+PATH="$PATH:/usr/ccs/bin:/usr/ucb:/usr/xpg4/bin:/usr/xpg6/bin:$pathtmp"
+LIBRARY_PATH="$HOME/lib:/usr/local/lib:$LIBRARY_PATH"
+LD_LIBRARY_PATH="$HOME/lib:/usr/local/lib:$LD_LIBRARY_PATH"
+CPATH="$HOME/include:/usr/local/include:$CPATH"
+PKG_CONFIG_PATH="$HOME/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PATH LIBRARY_PATH LD_LIBRARY_PATH CPATH PKG_CONFIG_PATH
+if type pkg-config >config.tmp 2>&1
+then
+  PATH="$PATH:`pkg-config --variable=bindir kyotocabinet`"
+  LIBRARY_PATH="$LIBRARY_PATH:`pkg-config --variable=libdir kyotocabinet`"
+  LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`pkg-config --variable=libdir kyotocabinet`"
+  CPATH="$CPATH:`pkg-config --variable=includedir kyotocabinet`"
+  export PATH LIBRARY_PATH LD_LIBRARY_PATH CPATH PKG_CONFIG_PATH
+fi
+
+
+
+#================================================================
+# Options
+#================================================================
+
+# Internal variables
+enables=""
+
+# Debug mode
+AC_ARG_ENABLE(debug,
+  AC_HELP_STRING([--enable-debug], [build for debugging]))
+if test "$enable_debug" = "yes"
+then
+  MYJAVACFLAGS="$MYJAVACFLAGS -g"
+  MYJAVARUNFLAGS="$MYJAVARUNFLAGS -esa"
+  MYCXXFLAGS="-Wall -fPIC -fsigned-char -g -O0"
+  MYCPPFLAGS="$MYCPPFLAGS -UNDEBUG -D_KCDEBUG"
+  enables="$enables (debug)"
+fi
+
+# Developping mode
+AC_ARG_ENABLE(devel,
+  AC_HELP_STRING([--enable-devel], [build for development]))
+if test "$enable_devel" = "yes"
+then
+  MYJAVACFLAGS="$MYJAVACFLAGS -g"
+  MYJAVARUNFLAGS="$MYJAVARUNFLAGS -esa"
+  MYCXXFLAGS="-Wall -Wextra -Wno-unused-parameter -Wnon-virtual-dtor"
+  MYCXXFLAGS="$MYCXXFLAGS -fPIC -fsigned-char -g -O2 -fno-inline -pipe"
+  MYCPPFLAGS="$MYCPPFLAGS -UNDEBUG -D_KCDEBUG"
+  enables="$enables (devel)"
+fi
+
+# Specify the installation path of Kyoto Cabinet
+AC_ARG_WITH(kc,
+  AC_HELP_STRING([--with-kc=DIR], [search DIR/include and DIR/lib for Kyoto Cabinet]))
+if test -n "$with_kc"
+then
+  MYCPPFLAGS="$MYCPPFLAGS -I$with_kc/include"
+  MYLDFLAGS="$MYLDFLAGS -L$with_kc/lib"
+  CPATH="$CPATH:$with_kc/include"
+  LIBRARY_PATH="$LIBRARY_PATH:$with_kc/lib"
+  LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$with_kc/lib"
+  PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$with_kc/lib/pkgconfig"
+fi
+
+# Messages
+printf '#================================================================\n'
+printf '# Configuring Kyoto Cabinet for Java version %s.\n' "$PACKAGE_VERSION"
+printf '#================================================================\n'
+
+
+
+#================================================================
+# Checking Commands and Libraries
+#================================================================
+
+# Home directory of Java
+printf 'checking MYJAVAHOME... '
+if test -d "$JAVA_HOME"
+then
+  MYJAVAHOME="$JAVA_HOME"
+fi
+printf '%s\n' "$MYJAVAHOME"
+
+# Platform of Java
+printf 'checking JVMPLATFORM... '
+if uname | grep Darwin >config.tmp
+then
+  JVMPLATFORM="mac"
+else
+  for file in `\ls $MYJAVAHOME/include`
+  do
+    if test -d "$MYJAVAHOME/include/$file"
+    then
+      JVMPLATFORM="$file"
+    fi
+  done
+fi
+printf '%s\n' "$JVMPLATFORM"
+MYCPPFLAGS="$MYCPPFLAGS -I$MYJAVAHOME/include -I$MYJAVAHOME/include/$JVMPLATFORM"
+MYCPPFLAGS="$MYCPPFLAGS -I$MYJAVAHOME/Headers -I$MYJAVAHOME/Headers/$JVMPLATFORM"
+CPATH="$CPATH:$MYJAVAHOME/include:$MYJAVAHOME/include/$JVMPLATFORM"
+CPATH="$CPATH:$MYJAVAHOME/Headers:$MYJAVAHOME/Headers/$JVMPLATFORM"
+
+# Java compiler
+printf 'checking JAVAC... '
+JAVAC="$MYJAVAHOME/bin/javac"
+if uname | grep Darwin >config.tmp
+then
+  if test -x "$MYJAVAHOME/Commands/javac"
+  then
+    JAVAC="$MYJAVAHOME/Commands/javac"
+  else
+    JAVAC="$MYJAVAHOME/bin/javac"
+  fi
+fi
+if test -x "$JAVAC"
+then
+  printf '%s\n' "$JAVAC"
+else
+  printf 'no\n'
+  printf '#================================================================\n' 1>&2
+  printf '# WARNING: %s is not found.\n' "$JAVAC" 1>&2
+  printf '#================================================================\n' 1>&2
+fi
+
+# Other building tools
+if uname | grep Darwin >config.tmp
+then
+  if test -x "$MYJAVAHOME/Commands/java"
+  then
+    JAR="$MYJAVAHOME/Commands/jar"
+    JAVAH="$MYJAVAHOME/Commands/javah"
+    JAVADOC="$MYJAVAHOME/Commands/javadoc"
+    JAVARUN="$MYJAVAHOME/Commands/java"
+  else
+    JAR="$MYJAVAHOME/bin/jar"
+    JAVAH="$MYJAVAHOME/bin/javah"
+    JAVADOC="$MYJAVAHOME/bin/javadoc"
+    JAVARUN="$MYJAVAHOME/bin/java"
+  fi
+else
+  JAR="$MYJAVAHOME/bin/jar"
+  JAVAH="$MYJAVAHOME/bin/javah"
+  JAVADOC="$MYJAVAHOME/bin/javadoc"
+  JAVARUN="$MYJAVAHOME/bin/java"
+fi
+MYJAVARUNFLAGS="$MYJAVARUNFLAGS -Djava.library.path=.:$LD_LIBRARY_PATH"
+
+# C compiler
+AC_PROG_CC
+AC_PROG_CXX
+AC_LANG(C++)
+
+# System-depending optimization
+printf 'checking for 64-bit availability... '
+if printf 'main() {}' | $CC -xc -m64 -o config.tmp - >config.tmp 2>&1
+then
+  MYCFLAGS="-m64 $MYCFLAGS"
+  MYCXXFLAGS="-m64 $MYCXXFLAGS"
+  printf 'yes\n'
+else
+  printf 'no\n'
+fi
+if test "$enable_opt" != "no"
+then
+  printf 'checking for CPU optimization availability... '
+  if printf 'main() {}' | $CC -xc -march=native -o config.tmp - >config.tmp 2>&1
+  then
+    MYCFLAGS="-march=native $MYCFLAGS"
+    MYCXXFLAGS="-march=native $MYCXXFLAGS"
+    printf 'yes\n'
+  else
+    printf 'no\n'
+  fi
+fi
+
+# Underlying libraries
+AC_CHECK_LIB(c, main)
+AC_CHECK_LIB(m, main)
+AC_CHECK_LIB(pthread, main)
+AC_CHECK_LIB(rt, main)
+AC_CHECK_LIB(stdc++, main)
+AC_CHECK_LIB(regex, main)
+AC_CHECK_LIB(z, main)
+AC_CHECK_LIB(kyotocabinet, main)
+
+# Necessary headers
+AC_CHECK_HEADER(stdlib.h, true, AC_MSG_ERROR([stdlib.h is required]))
+AC_CHECK_HEADER(stdint.h, true, AC_MSG_ERROR([stdint.h is required]))
+AC_CHECK_HEADER(kccommon.h, true, AC_MSG_ERROR([kccommon.h is required]))
+AC_CHECK_HEADER(jni.h, true, AC_MSG_ERROR([jni.h is required]))
+
+# Checking the version of Kyoto Cabinet with pkg-config
+if type pkg-config >config.tmp 2>&1
+then
+  printf 'checking Kyoto Cabinet by pkg-config... '
+  if pkg-config --atleast-version=1.2.65 kyotocabinet
+  then
+    MYCPPFLAGS="$MYCPPFLAGS -I`pkg-config --variable=includedir kyotocabinet`"
+    MYLDFLAGS="$MYLDFLAGS -L`pkg-config --variable=libdir kyotocabinet`"
+    MYRUNPATH="$MYRUNPATH:`pkg-config --variable=libdir kyotocabinet`"
+    printf 'yes\n'
+  else
+    printf 'no\n'
+    AC_MSG_ERROR([required version of Kyoto Cabinet was not detected])
+  fi
+fi
+
+# Shared libraries
+if uname | grep Darwin >config.tmp
+then
+  MYLIBRARYFILES="$MYLIBRARYFILES libjkyotocabinet.$MYLIBVER.$MYLIBREV.0.dylib"
+  MYLIBRARYFILES="$MYLIBRARYFILES libjkyotocabinet.$MYLIBVER.dylib"
+  MYLIBRARYFILES="$MYLIBRARYFILES libjkyotocabinet.dylib"
+  MYLIBRARYFILES="$MYLIBRARYFILES libjkyotocabinet.jnilib"
+  MYLDLIBPATHENV="DYLD_LIBRARY_PATH"
+else
+  MYLIBRARYFILES="$MYLIBRARYFILES libjkyotocabinet.so.$MYLIBVER.$MYLIBREV.0"
+  MYLIBRARYFILES="$MYLIBRARYFILES libjkyotocabinet.so.$MYLIBVER"
+  MYLIBRARYFILES="$MYLIBRARYFILES libjkyotocabinet.so"
+fi
+
+
+
+#================================================================
+# Generic Settings
+#================================================================
+
+
+# Export variables
+AC_SUBST(JAVAC)
+AC_SUBST(JAR)
+AC_SUBST(JAVAH)
+AC_SUBST(JAVADOC)
+AC_SUBST(JAVARUN)
+AC_SUBST(MYLIBVER)
+AC_SUBST(MYLIBREV)
+AC_SUBST(MYJARFILES)
+AC_SUBST(MYJAVAFILES)
+AC_SUBST(MYLIBRARYFILES)
+AC_SUBST(MYLIBOBJFILES)
+AC_SUBST(MYJAVAHOME)
+AC_SUBST(MYJAVACFLAGS)
+AC_SUBST(MYJAVADOCFLAGS)
+AC_SUBST(MYJAVARUNFLAGS)
+AC_SUBST(MYCXXFLAGS)
+AC_SUBST(MYCPPFLAGS)
+AC_SUBST(MYLDFLAGS)
+AC_SUBST(MYRUNPATH)
+AC_SUBST(MYLDLIBPATHENV)
+
+# Targets
+AC_OUTPUT(Makefile)
+
+# Messages
+printf '#================================================================\n'
+printf '# Ready to make.\n'
+printf '#================================================================\n'
+
+
+
+# END OF FILE

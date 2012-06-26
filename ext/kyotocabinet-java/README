@@ -1,0 +1,26 @@
+================================================================
+ Kyoto Cabinet: a straightforward implementation of DBM
+ Copyright (C) 2009-2010 FAL Labs
+================================================================
+
+
+Please read the following documents with a WWW browser.
+How to install Kyoto Cabinet is explained in the API document.
+
+  README         - this file
+  COPYING        - license
+  doc/index.html - index of documents
+
+
+Kyoto Cabinet is released under the terms of the GNU General Public
+License version 3.  See the file `COPYING' for details.
+
+Kyoto Cabinet was written by FAL Labs.  You can contact the author
+by e-mail to `info@fallabs.com'.
+
+
+Thanks.
+
+
+
+== END OF FILE ==

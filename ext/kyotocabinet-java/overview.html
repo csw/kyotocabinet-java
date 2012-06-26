@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+<meta http-equiv="Content-Language" content="en" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="author" content="FAL Labs" />
+<meta name="keywords" content="Kyoto Cabinet, Java" />
+<meta name="description" content="API specifications of Java binding" />
+<link rel="contents" href="./" />
+<link rev="made" href="mailto:info@fallabs.com" />
+<title>Java Binding of Kyoto Cabinet</title>
+</head>
+
+<body>
+
+<h1>Java Binding of Kyoto Cabinet.</h1>
+
+<div>Kyoto Cabinet is a straightforward implementation of DBM.</div>
+
+<h2>Introduction</h2>
+
+<p>Kyoto Cabinet is a library of routines for managing a database.  The database is a simple data file containing records, each is a pair of a key and a value.  Every key and value is serial bytes with variable length.  Both binary data and character string can be used as a key and a value.  Each key must be unique within a database.  There is neither concept of data tables nor data types.  Records are organized in hash table or B+ tree.</p>
+
+<p>The following access methods are provided to the database: storing a record with a key and a value, deleting a record by a key, retrieving a record by a key.  Moreover, traversal access to every key are provided.  These access methods are similar to ones of the original DBM (and its followers: NDBM and GDBM) library defined in the UNIX standard.  Kyoto Cabinet is an alternative for the DBM because of its higher performance.</p>
+
+<p>Each operation of the hash database has the time complexity of "O(1)".  Therefore, in theory, the performance is constant regardless of the scale of the database.  In practice, the performance is determined by the speed of the main memory or the storage device.  If the size of the database is less than the capacity of the main memory, the performance will seem on-memory speed, which is faster than std::map of STL.  Of course, the database size can be greater than the capacity of the main memory and the upper limit is 8 exabytes.  Even in that case, each operation needs only one or two seeking of the storage device.</p>
+
+<p>Each operation of the B+ tree database has the time complexity of "O(log N)".  Therefore, in theory, the performance is logarithmic to the scale of the database.  Although the performance of random access of the B+ tree database is slower than that of the hash database, the B+ tree database supports sequential access in order of the keys, which realizes forward matching search for strings and range search for integers.  The performance of sequential access is much faster than that of random access.</p>
+
+<p>This library wraps the polymorphic database of the C++ API.  So, you can select the internal data structure by specifying the database name in runtime.  This library is thread-safe.</p>
+
+<h2>Installation</h2>
+
+<p>Install the latest version of Kyoto Cabinet beforehand and get the package of the Java binding of Kyoto Cabinet.  JDK 6 or later is also required.</p>
+
+<p>Enter the directory of the extracted package then perform installation.</p>
+
+<pre style="margin: 0em 0.8em; padding: 0.3em; background: #eeeeff none; border: 1px solid #cccccc; font-size: 90%;">./configure
+make
+make check
+su
+make install
+</pre>
+
+<p>When a series of work finishes, the JAR file `kyotocabinet.jar' and the shared object files `libjkyotocabinet.so' and so on are installed under `/usr/local/lib'.</p>
+
+<p>Let the class search path include `/usr/local/lib/kyotocabinet.jar' and let the library search path include `/usr/local/lib'.</p>
+
+<pre style="margin: 0em 0.8em; padding: 0.3em; background: #eeeeff none; border: 1px solid #cccccc; font-size: 90%;">CLASSPATH="$CLASSPATH:/usr/local/lib/kyotocabinet.jar"
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+export CLASSPATH LD_LIBRARY_PATH
+</pre>
+
+<p>The above settings can be specified by options of the runtime command.</p>
+
+<pre style="margin: 0em 0.8em; padding: 0.3em; background: #eeeeff none; border: 1px solid #cccccc; font-size: 90%;">java -cp .:kyotocabinet.jar -Djava.library.path=.:/usr/local/lib FooBarBaz ...
+</pre>
+
+<p>All symbols of Kyoto Cabinet are defined in the package `kyotocabinet'.  You can access them without any prefix by importing the package.</p>
+
+<pre style="margin: 0em 0.8em; padding: 0.3em; background: #eeeeff none; border: 1px solid #cccccc; font-size: 90%;">import kyotocabinet.*;
+</pre>
+
+<h2>Example</h2>
+
+<p>The following code is a typical example to use a database. </p>
+
+<pre style="margin: 0em 0.8em; padding: 0.3em; background: #eeeeff none; border: 1px solid #cccccc; font-size: 90%;">import kyotocabinet.*;
+
+public class KCDBEX1 {
+  public static void main(String[] args) {
+
+    // create the object
+    DB db = new DB();
+
+    // open the database
+    if (!db.open("casket.kch", DB.OWRITER | DB.OCREATE)){
+      System.err.println("open error: " + db.error());
+    }
+
+    // store records
+    if (!db.set("foo", "hop") ||
+        !db.set("bar", "step") ||
+        !db.set("baz", "jump")){
+      System.err.println("set error: " + db.error());
+    }
+
+    // retrieve records
+    String value = db.get("foo");
+    if (value != null){
+      System.out.println(value);
+    } else {
+      System.err.println("set error: " + db.error());
+    }
+
+    // traverse records
+    Cursor cur = db.cursor();
+    cur.jump();
+    String[] rec;
+    while ((rec = cur.get_str(true)) != null) {
+      System.out.println(rec[0] + ":" + rec[1]);
+    }
+    cur.disable();
+
+    // close the database
+    if(!db.close()){
+      System.err.println("close error: " + db.error());
+    }
+
+  }
+}
+</pre>
+
+<p>The following code is a more complex example, which uses the Visitor pattern.</p>
+
+<pre style="margin: 0em 0.8em; padding: 0.3em; background: #eeeeff none; border: 1px solid #cccccc; font-size: 90%;">import kyotocabinet.*;
+
+public class KCDBEX2 {
+  public static void main(String[] args) {
+
+    // create the object
+    DB db = new DB();
+
+    // open the database
+    if (!db.open("casket.kch", DB.OREADER)) {
+      System.err.println("open error: " + db.error());
+    }
+
+    // define the visitor
+    class VisitorImpl implements Visitor {
+      public byte[] visit_full(byte[] key, byte[] value) {
+        System.out.println(new String(key) + ":" + new String(value));
+        return NOP;
+      }
+      public byte[] visit_empty(byte[] key) {
+        System.err.println(new String(key) + " is missing");
+        return NOP;
+      }
+    }
+    Visitor visitor = new VisitorImpl();
+
+    // retrieve a record with visitor
+    if (!db.accept("foo".getBytes(), visitor, false) ||
+        !db.accept("dummy".getBytes(), visitor, false)) {
+      System.err.println("accept error: " + db.error());
+    }
+
+    // traverse records with visitor
+    if (!db.iterate(visitor, false)) {
+      System.err.println("iterate error: " + db.error());
+    }
+
+    // close the database
+    if(!db.close()){
+      System.err.println("close error: " + db.error());
+    }
+
+  }
+}
+</pre>
+
+<h2>License</h2>
+
+<div>Copyright (C) 2009-2011 FAL Labs</div>
+
+<p>Kyoto Cabinet is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.</p>
+
+<p>Kyoto Cabinet is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</p>
+
+</body>
+
+</html>
