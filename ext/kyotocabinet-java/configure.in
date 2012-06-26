@@ -111,6 +111,14 @@ printf 'checking MYJAVAHOME... '
 if test -d "$JAVA_HOME"
 then
   MYJAVAHOME="$JAVA_HOME"
+else
+  if uname | grep Darwin >config.tmp; then
+    # Mac OS X
+    MYJAVAHOME=/System/Library/Frameworks/JavaVM.framework/Home
+  elif [ -L /usr/bin/javac ]; then
+    # other Unix, but /usr/bin/javac is a symlink
+    MYJAVAHOME=`readlink -f /usr/bin/javac | sed "s:bin/javac::"`
+  fi
 fi
 printf '%s\n' "$MYJAVAHOME"
 
@@ -181,7 +189,12 @@ MYJAVARUNFLAGS="$MYJAVARUNFLAGS -Djava.library.path=.:$LD_LIBRARY_PATH"
 
 # C compiler
 AC_PROG_CC
-AC_PROG_CXX
+if uname | grep Darwin >config.tmp
+then
+  AC_PROG_CXX([c++ g++])
+else
+  AC_PROG_CXX
+fi
 AC_LANG(C++)
 
 # System-depending optimization
