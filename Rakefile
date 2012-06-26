@@ -10,6 +10,7 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require 'rake'
+require 'rake/clean'
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
@@ -33,12 +34,22 @@ file "ext/kyotocabinet-java/configure" => ["ext/kyotocabinet-java/configure.in"]
 end
 task :build => "ext/kyotocabinet-java/configure"
 
-require 'rake/testtask'
-Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
+file "test_ext/kyotocabinet.jar" => ["ext/kyotocabinet-java/configure"] do
+  sh "cd ext/kyotocabinet-java; ./configure --prefix=#{File.expand_path('../test_ext', __FILE__)} && make && make install && make clean"
 end
+
+CLEAN.include("ext/kyotocabinet-java/Makefile")
+CLEAN.include("test_ext/*")
+
+CLOBBER.include("ext/kyotocabinet-java/config.status")
+CLOBBER.include("ext/kyotocabinet-java/config.tmp")
+
+require 'rspec/core'
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
+end
+task :spec => "test_ext/kyotocabinet.jar"
 
 # XXX: using simplecov instead
 # require 'rcov/rcovtask'
