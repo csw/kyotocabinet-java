@@ -31,8 +31,14 @@ class Loader {
    * Load the native library.
    */
   static synchronized void load() {
+    // JNI library will be loaded from the Ruby side
     if(loaded) return;
-    System.loadLibrary("jkyotocabinet");
+    String sopath = System.getProperty("kyotocabinet.lib");
+    if (sopath != null) {
+      System.load(sopath);
+    } else {
+      System.loadLibrary("jkyotocabinet");
+    }
     loaded = true;
   }
   //----------------------------------------------------------------

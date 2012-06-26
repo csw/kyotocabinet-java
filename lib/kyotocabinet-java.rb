@@ -22,15 +22,19 @@ require 'java'
 
 unless Java.const_defined? :Kyotocabinet
   # need to require kyotocabinet.jar
-  if File.exist? '/usr/local/lib/kyotocabinet.jar'
-    require '/usr/local/lib/kyotocabinet.jar'
-    begin
-      Java::Kyotocabinet::DB
-    rescue NameError
-      raise "Kyoto Cabinet classes could not be loaded, probably due to JNI library linking problems. Verify that libjkyotocabinet is in a directory on java.library.path (#{java.lang.System.getProperty('java.library.path')})."
-    end
-  else
-    raise "kyotocabinet.jar could not be found!"
+  soname = java.lang.System.mapLibraryName("jkyotocabinet")
+  jdir = $LOAD_PATH.find { |d| File.exist? "#{d}/kyotocabinet.jar" }
+  raise "Could not find kyotocabinet.jar on $LOAD_PATH!" unless jdir
+  sopath = "#{jdir}/#{soname}"
+  unless File.exist? sopath
+    raise "JNI library #{soname} not installed in #{jdir}!"
+  end
+  java.lang.System.setProperty("kyotocabinet.lib", sopath)
+  require 'kyotocabinet.jar'
+  begin
+    Java::Kyotocabinet::Loader.load
+  rescue NameError
+    raise "Kyoto Cabinet classes could not be loaded!"
   end
 end
 
