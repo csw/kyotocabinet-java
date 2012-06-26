@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "kyotocabinet-java"
-  s.version = "0.1.0"
+  s.version = "0.2.0"
   s.platform = "java"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Clayton Wheeler"]
+  s.authors = ["FAL Labs", "Clayton Wheeler"]
   s.date = "2012-06-26"
   s.description = "Wrapper for Kyoto Cabinet's Java library for use with JRuby, to provide the same interface as the native kyotocabinet-ruby gem for MRI."
   s.email = "cswh@umich.edu"
@@ -90,11 +90,10 @@ Gem::Specification.new do |s|
     "ext/kyotocabinet-java/kyotocabinet_ValueIterator.h",
     "ext/kyotocabinet-java/overview.html",
     "kyotocabinet-java.gemspec",
-    "lib/kyotocabinet-java.rb",
-    "lib/kyotocabinet-java/version.rb"
+    "lib/kyotocabinet.rb"
   ]
   s.homepage = "http://github.com/csw/kyotocabinet-java"
-  s.licenses = ["MIT"]
+  s.licenses = ["GPL"]
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.24"
   s.summary = "Kyoto Cabinet Java library for JRuby"
