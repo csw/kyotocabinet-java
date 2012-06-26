@@ -4,8 +4,8 @@ require File.expand_path('../lib/kyotocabinet-java/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Clayton Wheeler"]
   gem.email         = ["cswh@umich.edu"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Kyoto Cabinet Java library for JRuby}
+  gem.summary       = %q{Wrapper for Kyoto Cabinet's Java library for use with JRuby, to provide the same interface as the native kyotocabinet-ruby gem for MRI.'}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
