@@ -40,6 +40,7 @@ Gem::Specification.new do |s|
     "ext/kyotocabinet-java/VCmakefile",
     "ext/kyotocabinet-java/ValueIterator.java",
     "ext/kyotocabinet-java/Visitor.java",
+    "ext/kyotocabinet-java/configure",
     "ext/kyotocabinet-java/configure.in",
     "ext/kyotocabinet-java/doc/allclasses-frame.html",
     "ext/kyotocabinet-java/doc/allclasses-noframe.html",
