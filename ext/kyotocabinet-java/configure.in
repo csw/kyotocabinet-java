@@ -48,7 +48,8 @@ then
   export PATH LIBRARY_PATH LD_LIBRARY_PATH CPATH PKG_CONFIG_PATH
 fi
 
-
+# Installation paths
+libdir=${prefix}
 
 #================================================================
 # Options
@@ -294,6 +295,7 @@ AC_SUBST(MYCPPFLAGS)
 AC_SUBST(MYLDFLAGS)
 AC_SUBST(MYRUNPATH)
 AC_SUBST(MYLDLIBPATHENV)
+AC_SUBST(libdir)
 
 # Targets
 AC_OUTPUT(Makefile)
