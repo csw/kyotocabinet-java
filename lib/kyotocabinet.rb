@@ -54,6 +54,12 @@ module KyotoCabinet
       end
     end
 
+    def ret_bytes(v)
+      if v
+        String.from_java_bytes(v)
+      end
+    end
+
   end
 end
 
@@ -98,7 +104,7 @@ module Java::Kyotocabinet
 
     alias_method :_get, :get
     def get(key)
-      String.from_java_bytes(self._get(key.to_java_bytes))
+      ret_bytes(self._get(key.to_java_bytes))
     end
     alias_method :[], :get
 
