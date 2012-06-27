@@ -108,6 +108,11 @@ module Java::Kyotocabinet
     end
     alias_method :[], :get
 
+    alias_method :_increment, :increment
+    def increment(key, num=0, orig=0)
+      self._increment(key, num, orig)
+    end
+
     alias_method :_set, :set
     def set(k, v)
       self._set(k.to_java_bytes, v.to_s.to_java_bytes)
