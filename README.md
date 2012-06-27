@@ -1,5 +1,8 @@
 # kyotocabinet-java
 
+[![Build Status](https://secure.travis-ci.org/csw/kyotocabinet-java.png)](http://travis-ci.org/csw/kyotocabinet-java)
+
+
 This is a Ruby gem providing a JRuby interface for the
 [Kyoto Cabinet][] database library. It aims to provide an identical
 interface to the official [Ruby library][]. However, that library uses
