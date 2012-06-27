@@ -11,7 +11,7 @@ instead implemented atop Kyoto Cabinet's [Java API][], with a minimal
 Ruby adaptation layer to compensate for interface differences.
 
 [Kyoto Cabinet]: http://fallabs.com/kyotocabinet/
-[Ruby library]: http://fallabs.com/kyotocabinet/
+[Ruby library]: http://fallabs.com/kyotocabinet/rubydoc/
 [Java API]: http://fallabs.com/kyotocabinet/javadoc/
 
 ## Prerequisites
