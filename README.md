@@ -88,6 +88,6 @@ Labs might do it. Patches would be welcome.
 
 ## Copyright
 
-Copyright (c) 2012 Clayton Wheeler. See LICENSE.txt for
-further details.
+Copyright (c) 2012 Clayton Wheeler (packaging, Ruby library) and
+copyright (c) 2009-2012 FAL Labs. See LICENSE.txt for further details.
 
