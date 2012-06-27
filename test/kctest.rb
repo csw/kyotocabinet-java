@@ -23,18 +23,24 @@ include KyotoCabinet
 
 # main routine
 def main
-  ARGV.length >= 1 || usage
-  if ARGV[0] == "order"
-    rv = runorder
-  elsif ARGV[0] == "wicked"
-    rv = runwicked
-  elsif ARGV[0] == "misc"
-    rv = runmisc
-  else
-    usage
+  begin
+    ARGV.length >= 1 || usage
+    if ARGV[0] == "order"
+      rv = runorder
+    elsif ARGV[0] == "wicked"
+      rv = runwicked
+    elsif ARGV[0] == "misc"
+      rv = runmisc
+    else
+      usage
+    end
+    GC.start
+    return rv
+  rescue
+    $stderr.puts "#{$!.class}: #{$!}"
+    $stderr.puts $!.backtrace.join("\n")
+    exit 1
   end
-  GC.start
-  return rv
 end
 
 
@@ -54,7 +60,7 @@ end
 # print the error message of the database
 def dberrprint(db, func)
   err = db.error
-  printf("%s: %s: %d: %s: %s\n", $progname, func, err.code, err.name, err.message)
+  $stderr.printf("%s: %s: %d: %s: %s\n", $progname, func, err.code, err.name, err.message)
 end
 
 
