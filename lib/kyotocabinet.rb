@@ -143,5 +143,9 @@ module Java::Kyotocabinet
 end
 
 module KyotoCabinet
-  import Java::Kyotocabinet
+  java_import Java::Kyotocabinet::Cursor
+  java_import Java::Kyotocabinet::DB
+  java_import Java::Kyotocabinet::Error
+  java_import Java::Kyotocabinet::FileProcessor
+  java_import Java::Kyotocabinet::Visitor
 end
