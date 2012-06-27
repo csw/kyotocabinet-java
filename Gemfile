@@ -14,6 +14,7 @@ group :development do
 end
 
 group :test do
+  gem "rake", ">= 0.9"
   gem "bundler", "~> 1.1.3"
   gem "rspec", "~> 2.10.0"
 end
