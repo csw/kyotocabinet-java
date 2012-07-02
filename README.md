@@ -17,11 +17,13 @@ Ruby adaptation layer to compensate for interface differences.
 ## Prerequisites
 
 Installation of this gem requires that Kyoto Cabinet (>= 1.2.76)
-already be installed. It also requires a C++ compiler and JDK, since
-it contains a patched copy of the [kyotocabinet-java][] library, which
-will be compiled upon installation. It does not attempt to install
-anything outside the RubyGems directory.
+already be installed. See the [installation notes][] for
+platform-specific instructions. It also requires a C++ compiler and
+JDK, since it contains a patched copy of the [kyotocabinet-java][]
+library, which will be compiled upon installation. It does not attempt
+to install anything outside the RubyGems directory.
 
+[installation notes]: https://github.com/csw/kyotocabinet-java/wiki/Kyoto-Cabinet-installation
 [kyotocabinet-java]: http://fallabs.com/kyotocabinet/javapkg/
 
 ## Installation
