@@ -148,6 +148,13 @@ module KyotoCabinet
         end
       end
 
+      describe "#remove_bulk" do
+        it "works with a single key" do
+          @db.remove_bulk(["hello"])
+          @db["hello"].should be_nil
+        end
+      end
+
       describe "#seize" do
         it "returns the correct value" do
           @db.seize("hello").should == "world"

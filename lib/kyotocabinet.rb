@@ -276,13 +276,12 @@ module Java::Kyotocabinet
       _open(path, mode)
     end
 
+    convert_args :remove, [BYTE_ARRAY]
+
     alias_method :_remove_bulk, :remove_bulk
     def remove_bulk(keys, atomic=true)
-      # TODO: takes byte[][]
-      _remove_bulk()
+      _remove_bulk(conv_string_array(keys), atomic)
     end
-
-    convert_args :remove, [BYTE_ARRAY]
 
     convert_args :replace, [BYTE_ARRAY, BYTE_ARRAY]
 
