@@ -32,6 +32,7 @@ module KyotoCabinet
         @db.open("%", KyotoCabinet::DB::OWRITER | KyotoCabinet::DB::OCREATE)
         @db["hello"] = "world"
         @db["int_a"] = [0].pack("Q>")
+        @db["empty"] = nil
         @db[BIN] = BIN
       end
 
@@ -101,6 +102,42 @@ module KyotoCabinet
         end
       end
 
+      describe "#each" do
+        it "works like block #iterate without side effects" do
+          value = nil
+          @db.each do |k, v|
+            if k == "hello"
+              value = v
+            end
+            "12345"
+          end
+          value.should == "world"
+          @db["hello"].should == "world"
+        end
+      end
+
+      describe "#each_key" do
+        it "gives keys" do
+          keys = []
+          @db.each_key do |k|
+            keys << k
+          end
+          keys.sort!
+          keys.should == [BIN, "empty", "hello", "int_a"]
+        end
+      end
+
+      describe "#each_value" do
+        it "gives values" do
+          values = []
+          @db.each_value do |v|
+            values << v
+          end
+          values.sort!
+          values.should == ['', @db["int_a"], BIN, "world"]
+        end
+      end
+
       describe "#get" do
         it "returns nil properly" do
           @db.get("foo").should be_nil
@@ -151,9 +188,11 @@ module KyotoCabinet
           @db.iterate do |k, v|
             if k == "hello"
               value = v
+              "NEWVAL"
             end
           end
           value.should == "world"
+          @db["hello"].should == "NEWVAL"
         end
       end
 

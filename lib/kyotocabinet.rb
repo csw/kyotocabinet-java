@@ -104,26 +104,31 @@ module KyotoCabinet
   class VisitorProxy
     include Java::Kyotocabinet::Visitor
     
-    def initialize(v)
+    def initialize(v, readonly=false)
       @v = v
+      @readonly = readonly
     end
 
     def visit_empty(key)
       rv = @v.visit_empty(String.from_java_bytes(key))
-      rv ? rv.to_java_bytes : nil
+      rv && (! @readonly) ? rv.to_java_bytes : nil
     end
 
     def visit_full(key, value)
       rv = @v.visit_full(String.from_java_bytes(key),
                          String.from_java_bytes(value))
-      rv ? rv.to_java_bytes : nil
+      rv && (! @readonly) ? rv.to_java_bytes : nil
     end
   end
 
   class BlockVisitor
 
-    def self.wrap(proc)
-      VisitorProxy.new(self.new(proc))
+    def self.wrap(proc, ro=false)
+      VisitorProxy.new(self.new(proc), ro)
+    end
+
+    def self.wrap_nop(proc)
+      NOPVisitor.new(self.wrap(proc, true))
     end
 
     def initialize(proc)
@@ -138,6 +143,22 @@ module KyotoCabinet
       @proc.call(key, value)
     end
     
+  end
+
+  class NOPVisitor
+    def initialize(base)
+      @base = base
+    end
+
+    def visit_empty(key)
+      @base.visit_empty(key)
+      Visitor::NOP
+    end
+
+    def visit_full(key, value)
+      @base.visit_full(key, value)
+      Visitor::NOP
+    end
   end
 
 end
@@ -207,6 +228,20 @@ module Java::Kyotocabinet
     convert_args :cas, [BYTE_ARRAY, BYTE_ARRAY, BYTE_ARRAY]
     convert_args :check, [BYTE_ARRAY]
 
+    def each(&blk)
+      _iterate(BlockVisitor.wrap_nop(blk), false)
+    end
+
+    def each_key
+      _iterate(BlockVisitor.wrap_nop(lambda { |k, v| yield k }),
+               false)
+    end
+
+    def each_value
+      _iterate(BlockVisitor.wrap_nop(lambda { |k, v| yield v }),
+               false)
+    end
+
     alias_method :_get, :get
     def get(key)
       ret_bytes(self._get(key.to_java_bytes))
@@ -245,7 +280,6 @@ module Java::Kyotocabinet
                  writable)
       end
     end
-
 
     alias_method :_match_prefix, :match_prefix
     def match_prefix(prefix, max=-1)
