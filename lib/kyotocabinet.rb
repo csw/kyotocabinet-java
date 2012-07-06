@@ -283,6 +283,7 @@ module Java::Kyotocabinet
     end
 
     convert_args :remove, [BYTE_ARRAY]
+    alias_method :delete, :remove
 
     alias_method :_remove_bulk, :remove_bulk
     def remove_bulk(keys, atomic=true)

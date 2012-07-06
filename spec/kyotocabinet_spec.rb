@@ -94,6 +94,13 @@ module KyotoCabinet
         end
       end
 
+      describe "#delete" do
+        it "works like #remove" do
+          @db.delete('hello')
+          @db['hello'].should be_nil
+        end
+      end
+
       describe "#get" do
         it "returns nil properly" do
           @db.get("foo").should be_nil
