@@ -207,11 +207,6 @@ module Java::Kyotocabinet
     convert_args :cas, [BYTE_ARRAY, BYTE_ARRAY, BYTE_ARRAY]
     convert_args :check, [BYTE_ARRAY]
 
-    alias_method :_match_prefix, :match_prefix
-    def match_prefix(prefix, limit=-1)
-      self._match_prefix(prefix, limit)
-    end
-
     alias_method :_get, :get
     def get(key)
       ret_bytes(self._get(key.to_java_bytes))
