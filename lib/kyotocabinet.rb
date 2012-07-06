@@ -42,14 +42,54 @@ module KyotoCabinet
   module Adaptation
     BYTE_ARRAY = [1].to_java(:byte).java_class
 
+    def conv_string_array(a)
+      ba = Java::byte[a.size, 0].new
+      a.each_with_index do |k, i|
+        ba[i] = k.to_java_bytes
+      end
+      ba
+    end
+
+    def to_string_array(ba)
+      ba.collect { |e| String.from_java_bytes(e) }
+    end
+
     def self.included(mod)
       super(mod)
-      mod.class_eval do
-        def self.with_method_handle(mname, *args)
-          $stderr.puts "in #{self}.with_method_handle(#{mname.inspect}, #{args.inspect})"
+      mod.instance_eval do
+        def with_java_method(mname, args)
           mh = self.java_method(mname, args)
-          $stderr.puts "got method handle #{mh}"
           yield mh
+        end
+        def convert_args(mname, args)
+          indices = []
+          args.each_with_index do |a, i|
+            if a == BYTE_ARRAY
+              indices << i
+            end
+          end
+          mh = self.java_method(mname, args)
+          self.send(:define_method, mname) do |*argv|
+            indices.each { |i| argv[i] = argv[i].to_java_bytes }
+            mh.bind(self).call(*argv)
+          end
+        end
+
+        def convert_args_ret(mname, args)
+          indices = []
+          args.each_with_index do |a, i|
+            if a == BYTE_ARRAY
+              indices << i
+            end
+          end
+          mh = self.java_method(mname, args)
+          self.send(:define_method, mname) do |*argv|
+            indices.each { |i| argv[i] = argv[i].to_java_bytes }
+            rv = mh.bind(self).call(*argv)
+            if rv
+              String.from_java_bytes(rv)
+            end
+          end
         end
       end
     end
@@ -59,8 +99,27 @@ module KyotoCabinet
         String.from_java_bytes(v)
       end
     end
-
   end
+
+  class VisitorProxy
+    include Java::Kyotocabinet::Visitor
+    
+    def initialize(v)
+      @v = v
+    end
+
+    def visit_empty(key)
+      rv = @v.visit_empty(String.from_java_bytes(key))
+      rv ? rv.to_java_bytes : nil
+    end
+
+    def visit_full(key, value)
+      rv = @v.visit_full(String.from_java_bytes(key),
+                         String.from_java_bytes(value))
+      rv ? rv.to_java_bytes : nil
+    end
+  end
+
 end
 
 module Java::Kyotocabinet
@@ -97,6 +156,27 @@ module Java::Kyotocabinet
   class DB
     include KyotoCabinet::Adaptation
 
+    # The Java API is thread-safe so this can be a no-op
+    GCONCURRENT = 0
+
+    alias_method :_accept, :accept
+    def accept(key, visitor=nil, writable=true)
+      vp = KyotoCabinet::VisitorProxy.new(visitor)
+      self._accept(key.to_java_bytes, vp, writable)
+    end
+
+    alias_method :_accept_bulk, :accept_bulk
+    def accept_bulk(keys, visitor=nil, writable=true)
+      self._accept_bulk(conv_string_array(keys),
+                        KyotoCabinet::VisitorProxy.new(visitor),
+                        writable)
+    end
+
+    convert_args :add, [BYTE_ARRAY, BYTE_ARRAY]
+    convert_args :append, [BYTE_ARRAY, BYTE_ARRAY]
+    convert_args :cas, [BYTE_ARRAY, BYTE_ARRAY, BYTE_ARRAY]
+    convert_args :check, [BYTE_ARRAY]
+
     alias_method :_match_prefix, :match_prefix
     def match_prefix(prefix, limit=-1)
       self._match_prefix(prefix, limit)
@@ -108,10 +188,72 @@ module Java::Kyotocabinet
     end
     alias_method :[], :get
 
+    alias_method :_get_bulk, :get_bulk
+    def get_bulk(keys, atomic=true)
+      ra = _get_bulk(conv_string_array(keys), atomic)
+      h = {}
+      i = 0
+      while i < ra.size
+        h[String.from_java_bytes(ra[i])] = String.from_java_bytes(ra[i + 1])
+        i += 2
+      end
+      h
+    end
+
     alias_method :_increment, :increment
     def increment(key, num=0, orig=0)
-      self._increment(key, num, orig)
+      self._increment(key.to_java_bytes, num, orig)
     end
+
+    alias_method :_increment_double, :increment_double
+    def increment_double(key, num=0, orig=0)
+      _increment_double(key.to_java_bytes, num, orig)
+    end
+
+    ## TODO: iterate takes visitor or block
+
+    alias_method :_match_prefix, :match_prefix
+    def match_prefix(prefix, max=-1)
+      _match_prefix(prefix, max)
+    end
+
+    alias_method :_match_regex, :match_regex
+    def match_regex(regex, max=-1)
+      _match_regex(regex, max)
+    end
+
+    alias_method :_match_similar, :match_similar
+    def match_similar(origin, range=1, utf=false, max=-1)
+      _match_similar(origin, range, utf, max)
+    end
+
+    alias_method :_merge, :merge
+    def merge(srcary, mode=DB::MSET)
+      # TODO: takes DB[]
+      _merge()
+    end
+
+    alias_method :_occupy, :occupy
+    def occupy(writable=false, proc=nil)
+      _occupy(writable, proc)
+    end
+
+    alias_method :_open, :open
+    def open(path=':', mode=DB::OWRITER|DB::OCREATE)
+      _open(path, mode)
+    end
+
+    alias_method :_remove_bulk, :remove_bulk
+    def remove_bulk(keys, atomic=true)
+      # TODO: takes byte[][]
+      _remove_bulk()
+    end
+
+    convert_args :remove, [BYTE_ARRAY]
+
+    convert_args :replace, [BYTE_ARRAY, BYTE_ARRAY]
+
+    convert_args_ret :seize, [BYTE_ARRAY]
 
     alias_method :_set, :set
     def set(k, v)
@@ -131,10 +273,24 @@ module Java::Kyotocabinet
       self._set_bulk(ba, atomic)
     end
 
+    ## TODO: store?
+
     alias_method :_synchronize, :synchronize
     def synchronize(hard=false, proc=nil)
       self._synchronize(hard, proc)
     end
+
+    def transaction(hard=false)
+      begin_transaction(hard)
+      commit = false
+      begin
+        commit = yield
+      ensure
+        end_transaction(commit)
+      end
+      commit
+    end
+
 
     def cursor_process
       cur = self.cursor()
