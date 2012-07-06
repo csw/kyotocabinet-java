@@ -263,8 +263,7 @@ module Java::Kyotocabinet
 
     alias_method :_merge, :merge
     def merge(srcary, mode=DB::MSET)
-      # TODO: takes DB[]
-      _merge()
+      _merge(srcary.to_java(DB), mode)
     end
 
     alias_method :_occupy, :occupy

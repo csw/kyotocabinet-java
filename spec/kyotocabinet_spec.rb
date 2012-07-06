@@ -134,6 +134,20 @@ module KyotoCabinet
         end
       end
 
+      describe "#merge" do
+        it "combines multiple DBs" do
+          db1 = KyotoCabinet::DB.new
+          db1.open('%')
+          db1['z1'] = 'xyzzy'
+          db2 = KyotoCabinet::DB.new
+          db2.open('%')
+          db2['z2'] = 'foo'
+          @db.merge([db1, db2])
+          @db['z1'].should == 'xyzzy'
+          @db['z2'].should == 'foo'
+        end
+      end
+
       describe "#seize" do
         it "returns the correct value" do
           @db.seize("hello").should == "world"
