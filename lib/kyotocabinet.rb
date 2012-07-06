@@ -120,9 +120,32 @@ module KyotoCabinet
     end
   end
 
+  class BlockVisitor
+
+    def self.wrap(proc)
+      VisitorProxy.new(self.new(proc))
+    end
+
+    def initialize(proc)
+      @proc = proc
+    end
+
+    def visit_empty(key)
+      @proc.call(key)
+    end
+
+    def visit_full(key, value)
+      @proc.call(key, value)
+    end
+    
+  end
+
 end
 
 module Java::Kyotocabinet
+  VisitorProxy = KyotoCabinet::VisitorProxy
+  BlockVisitor = KyotoCabinet::BlockVisitor
+
   class Cursor
     include KyotoCabinet::Adaptation
 
@@ -161,14 +184,15 @@ module Java::Kyotocabinet
 
     alias_method :_accept, :accept
     def accept(key, visitor=nil, writable=true)
-      vp = KyotoCabinet::VisitorProxy.new(visitor)
-      self._accept(key.to_java_bytes, vp, writable)
+      self._accept(key.to_java_bytes,
+                   VisitorProxy.new(visitor),
+                   writable)
     end
 
     alias_method :_accept_bulk, :accept_bulk
     def accept_bulk(keys, visitor=nil, writable=true)
       self._accept_bulk(conv_string_array(keys),
-                        KyotoCabinet::VisitorProxy.new(visitor),
+                        VisitorProxy.new(visitor),
                         writable)
     end
 
@@ -210,7 +234,17 @@ module Java::Kyotocabinet
       _increment_double(key.to_java_bytes, num, orig)
     end
 
-    ## TODO: iterate takes visitor or block
+    alias_method :_iterate, :iterate
+    def iterate(visitor=nil, writable=true, &blk)
+      if visitor
+        _iterate(VisitorProxy.new(visitor),
+                 writable)
+      else
+        _iterate(BlockVisitor.wrap(blk),
+                 writable)
+      end
+    end
+
 
     alias_method :_match_prefix, :match_prefix
     def match_prefix(prefix, max=-1)

@@ -117,8 +117,20 @@ module KyotoCabinet
       end
 
       describe "#iterate" do
-        it "works" do
-          
+        it "works with a visitor" do
+          v = TestVisitor.new
+          @db.iterate(v)
+          v.full.should_not be_nil
+        end
+
+        it "works with a block" do
+          value = nil
+          @db.iterate do |k, v|
+            if k == "hello"
+              value = v
+            end
+          end
+          value.should == "world"
         end
       end
 
