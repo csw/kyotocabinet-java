@@ -233,12 +233,12 @@ module Java::Kyotocabinet
     end
 
     def each_key
-      _iterate(BlockVisitor.wrap_nop(lambda { |k, v| yield k }),
+      _iterate(BlockVisitor.wrap_nop(lambda { |k, v| yield [k] }),
                false)
     end
 
     def each_value
-      _iterate(BlockVisitor.wrap_nop(lambda { |k, v| yield v }),
+      _iterate(BlockVisitor.wrap_nop(lambda { |k, v| yield [v] }),
                false)
     end
 

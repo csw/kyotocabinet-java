@@ -123,7 +123,7 @@ module KyotoCabinet
             keys << k
           end
           keys.sort!
-          keys.should == [BIN, "empty", "hello", "int_a"]
+          keys.should == [[BIN], ["empty"], ["hello"], ["int_a"]]
         end
       end
 
@@ -134,7 +134,7 @@ module KyotoCabinet
             values << v
           end
           values.sort!
-          values.should == ['', @db["int_a"], BIN, "world"]
+          values.should == [[''], [@db["int_a"]], [BIN], ["world"]]
         end
       end
 
