@@ -183,17 +183,23 @@ module Java::Kyotocabinet
     GCONCURRENT = 0
 
     alias_method :_accept, :accept
-    def accept(key, visitor=nil, writable=true)
-      self._accept(key.to_java_bytes,
-                   VisitorProxy.new(visitor),
-                   writable)
+    def accept(key, visitor=nil, writable=true, &blk)
+      vp = if visitor
+             VisitorProxy.new(visitor)
+           else
+             BlockVisitor.wrap(blk)
+           end
+      self._accept(key.to_java_bytes, vp, writable)
     end
 
     alias_method :_accept_bulk, :accept_bulk
-    def accept_bulk(keys, visitor=nil, writable=true)
-      self._accept_bulk(conv_string_array(keys),
-                        VisitorProxy.new(visitor),
-                        writable)
+    def accept_bulk(keys, visitor=nil, writable=true, &blk)
+      vp = if visitor
+             VisitorProxy.new(visitor)
+           else
+             BlockVisitor.wrap(blk)
+           end
+      self._accept_bulk(conv_string_array(keys), vp, writable)
     end
 
     convert_args :add, [BYTE_ARRAY, BYTE_ARRAY]

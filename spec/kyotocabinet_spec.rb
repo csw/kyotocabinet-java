@@ -36,18 +36,34 @@ module KyotoCabinet
       end
 
       describe "#accept" do
-        it "works" do
+        it "works with a visitor" do
           v = TestVisitor.new
           @db.accept("hello", v, true)
           v.full.should == "world"
         end
+        it "works with a block" do
+          value = nil
+          @db.accept("hello") do |k, v|
+            if k == "hello"
+              value = v
+            end
+          end
+          value.should == "world"
+        end
       end
 
       describe "#accept_bulk" do
-        it "works with one item" do
+        it "works with a visitor and one item" do
           v = TestVisitor.new
           @db.accept_bulk(["hello"], v, true)
           v.full.should == "world"
+        end
+        it "works with a block and one item" do
+          value = nil
+          @db.accept_bulk(["hello"]) do |k, v|
+            value = v if k == "hello"
+          end
+          value.should == "world"
         end
       end
 
