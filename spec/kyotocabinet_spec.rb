@@ -15,9 +15,70 @@ module KyotoCabinet
     end
   end
 
-  describe DB do
+  BIN = "\x01\xd6"
 
-    BIN = "\x01\xd6"
+  describe Cursor do
+    before(:each) do
+      @db = DB.new
+      @db.open('%')
+      @db["hello"] = "world"
+      @db["int_a"] = [0].pack("Q>")
+      @db["empty"] = nil
+      @db[BIN] = BIN
+      @cur = @db.cursor
+    end
+
+    describe "#accept" do
+      it "works with a Visitor" do
+        @cur.jump("hello")
+        v = TestVisitor.new
+        @cur.accept(v, false)
+      end
+    end
+
+    describe "#jump" do
+      it "works with no args" do
+        @cur.jump()
+        @cur.get_key.should == BIN
+      end
+    end
+
+    describe "#jump_back" do
+      it "works with no args" do
+        @cur.jump_back()
+        @cur.get_key.should == "int_a"
+      end
+    end
+
+    describe "#seize" do
+      it "works" do
+        @cur.jump("hello")
+        r = @cur.seize
+        r[0].should == 'hello'
+        r[1].should == 'world'
+        @db['hello'].should == nil
+      end
+    end
+
+    describe "#set_value" do
+      it "works with step=true" do
+        @cur.jump("empty")
+        @cur.set_value("foo", true)
+        @cur.get_key.should == "hello"
+        @db["empty"].should == "foo"
+      end
+
+      it "works with step=false" do
+        @cur.jump("empty")
+        @cur.set_value("foo")
+        @cur.get_key.should == "empty"
+        @db["empty"].should == "foo"
+      end
+    end
+
+  end
+
+  describe DB do
 
     it "can create an in-memory tree DB" do
       db = DB.new

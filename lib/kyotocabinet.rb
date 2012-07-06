@@ -111,13 +111,13 @@ module KyotoCabinet
 
     def visit_empty(key)
       rv = @v.visit_empty(String.from_java_bytes(key))
-      rv && (! @readonly) ? rv.to_java_bytes : nil
+      rv && (! @readonly) ? rv.to_java_bytes : Visitor::NOP
     end
 
     def visit_full(key, value)
       rv = @v.visit_full(String.from_java_bytes(key),
                          String.from_java_bytes(value))
-      rv && (! @readonly) ? rv.to_java_bytes : nil
+      rv && (! @readonly) ? rv.to_java_bytes : Visitor::NOP
     end
   end
 
@@ -170,6 +170,21 @@ module Java::Kyotocabinet
   class Cursor
     include KyotoCabinet::Adaptation
 
+    alias_method :_accept, :accept
+    def accept(visitor=nil, writable=true, step=false)
+      vp = if visitor
+             VisitorProxy.new(visitor, !writable)
+           else
+             if writable
+               BlockVisitor.wrap(blk)
+             else
+               BlockVisitor.wrap_nop(blk)
+             end
+           end
+      _accept(vp, writable, step)
+    end
+
+
     alias_method :_get, :get
     def get(step=false)
       r = self._get(step)
@@ -183,18 +198,46 @@ module Java::Kyotocabinet
 
     alias_method :_get_key, :get_key
     def get_key(step=false)
-      r = self._get_key(step)
-      if r
-        return String.from_java_bytes(r)
+      ret_bytes(_get_key(step))
+    end
+
+    alias_method :_get_value, :get_value
+    def get_value(step=false)
+      ret_bytes(_get_value(step))
+    end
+
+
+    alias_method :_jump, :jump
+    def jump(key=nil)
+      if key
+        _jump(key.to_java_bytes)
       else
-        return nil
+        _jump()
       end
     end
 
-    alias_method :_jump, :jump
-    def jump(key)
-      self._jump(key.to_java_bytes)
+    alias_method :_jump_back, :jump_back
+    def jump_back(key=nil)
+      if key
+        _jump_back(key.to_java_bytes)
+      else
+        _jump_back()
+      end
     end
+
+    alias_method :_seize, :seize
+    def seize()
+      to_string_array(_seize())
+    end
+
+
+    alias_method :_set_value, :set_value
+    def set_value(value, step=false)
+      _set_value(value ? value.to_java_bytes : nil,
+                 step)
+    end
+
+
   end # class Cursor
 
   class DB
@@ -206,9 +249,13 @@ module Java::Kyotocabinet
     alias_method :_accept, :accept
     def accept(key, visitor=nil, writable=true, &blk)
       vp = if visitor
-             VisitorProxy.new(visitor)
+             VisitorProxy.new(visitor, !writable)
            else
-             BlockVisitor.wrap(blk)
+             if writable
+               BlockVisitor.wrap(blk)
+             else               
+               BlockVisitor.wrap_nop(blk)
+             end
            end
       self._accept(key.to_java_bytes, vp, writable)
     end
@@ -216,9 +263,13 @@ module Java::Kyotocabinet
     alias_method :_accept_bulk, :accept_bulk
     def accept_bulk(keys, visitor=nil, writable=true, &blk)
       vp = if visitor
-             VisitorProxy.new(visitor)
+             VisitorProxy.new(visitor, !writable)
            else
-             BlockVisitor.wrap(blk)
+             if writable
+               BlockVisitor.wrap(blk)
+             else               
+               BlockVisitor.wrap_nop(blk)
+             end
            end
       self._accept_bulk(conv_string_array(keys), vp, writable)
     end
