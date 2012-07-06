@@ -292,6 +292,7 @@ module Java::Kyotocabinet
       self._set(k.to_java_bytes, v.to_s.to_java_bytes)
     end
     alias_method :[]=, :set
+    alias_method :store, :set
 
     alias_method :_set_bulk, :set_bulk
     def set_bulk(rec_h, atomic)

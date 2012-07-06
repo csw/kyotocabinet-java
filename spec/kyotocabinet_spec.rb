@@ -161,6 +161,13 @@ module KyotoCabinet
         end
       end
 
+      describe "#store" do
+        it "works like #set" do
+          @db.store("a", "b")
+          @db["a"].should == "b"
+        end
+      end
+
       after(:each) do
         @db.close
       end
