@@ -5,24 +5,25 @@
 
 Gem::Specification.new do |s|
   s.name = "kyotocabinet-java"
-  s.version = "0.2.0"
+  s.version = "0.3.0"
   s.platform = "java"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["FAL Labs", "Clayton Wheeler"]
-  s.date = "2012-06-26"
+  s.date = "2012-07-12"
   s.description = "Wrapper for Kyoto Cabinet's Java library for use with JRuby, to provide the same interface as the native kyotocabinet-ruby gem for MRI."
   s.email = "cswh@umich.edu"
   s.extensions = ["ext/kyotocabinet-java/configure"]
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.md"
   ]
   s.files = [
     ".document",
+    ".travis.yml",
     "Gemfile",
     "LICENSE.txt",
-    "README.rdoc",
+    "README.md",
     "Rakefile",
     "VERSION",
     "ext/kyotocabinet-java/.gitignore",
@@ -91,7 +92,13 @@ Gem::Specification.new do |s|
     "ext/kyotocabinet-java/kyotocabinet_ValueIterator.h",
     "ext/kyotocabinet-java/overview.html",
     "kyotocabinet-java.gemspec",
-    "lib/kyotocabinet.rb"
+    "lib/kyotocabinet.rb",
+    "spec/kyotocabinet_spec.rb",
+    "spec/spec_helper.rb",
+    "test/.gitignore",
+    "test/kctest.rb",
+    "test/test.rb",
+    "travis-ci/install_kc"
   ]
   s.homepage = "http://github.com/csw/kyotocabinet-java"
   s.licenses = ["GPL"]
@@ -103,25 +110,16 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_development_dependency(%q<bundler>, ["~> 1.1.3"])
-      s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_development_dependency(%q<simplecov>, [">= 0"])
       s.add_development_dependency(%q<jruby-openssl>, [">= 0"])
     else
-      s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
-      s.add_dependency(%q<bundler>, ["~> 1.1.3"])
-      s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
       s.add_dependency(%q<simplecov>, [">= 0"])
       s.add_dependency(%q<jruby-openssl>, [">= 0"])
     end
   else
-    s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
-    s.add_dependency(%q<bundler>, ["~> 1.1.3"])
-    s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
     s.add_dependency(%q<simplecov>, [">= 0"])
     s.add_dependency(%q<jruby-openssl>, [">= 0"])
   end
