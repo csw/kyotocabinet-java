@@ -1834,7 +1834,7 @@ then
 else
   if uname | grep Darwin >config.tmp; then
     # Mac OS X
-    MYJAVAHOME=/System/Library/Frameworks/JavaVM.framework
+    MYJAVAHOME=`/usr/libexec/java_home`
   elif test -L /usr/bin/javac; then
     # other Unix, but /usr/bin/javac is a symlink
     MYJAVAHOME=`readlink -f /usr/bin/javac | sed "s:bin/javac::"`
