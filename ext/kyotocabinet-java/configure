@@ -1844,18 +1844,14 @@ printf '%s\n' "$MYJAVAHOME"
 
 # Platform of Java
 printf 'checking JVMPLATFORM... '
-if uname | grep Darwin >config.tmp
-then
-  JVMPLATFORM="mac"
-else
-  for file in `\ls $MYJAVAHOME/include`
-  do
-    if test -d "$MYJAVAHOME/include/$file"
-    then
-      JVMPLATFORM="$file"
-    fi
-  done
-fi
+for file in `\ls $MYJAVAHOME/include`
+do
+  if test -d "$MYJAVAHOME/include/$file"
+  then
+    JVMPLATFORM="$file"
+  fi
+done
+
 printf '%s\n' "$JVMPLATFORM"
 MYCPPFLAGS="$MYCPPFLAGS -I$MYJAVAHOME/include -I$MYJAVAHOME/include/$JVMPLATFORM"
 MYCPPFLAGS="$MYCPPFLAGS -I$MYJAVAHOME/Headers -I$MYJAVAHOME/Headers/$JVMPLATFORM"
