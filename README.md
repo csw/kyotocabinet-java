@@ -40,7 +40,7 @@ add something like this to your Gemfile:
 
 ```ruby
 gem "kyotocabinet-ruby", "~> 1.27.1", :platforms => [:mri, :rbx]
-gem "kyotocabinet-java", "~> 0.2.0", :platforms => :jruby
+gem "kyotocabinet-java", "~> 0.3.0", :platforms => :jruby
 ```
 
 ## Usage

@@ -1834,7 +1834,7 @@ then
 else
   if uname | grep Darwin >config.tmp; then
     # Mac OS X
-    MYJAVAHOME=/System/Library/Frameworks/JavaVM.framework
+    MYJAVAHOME=`/usr/libexec/java_home`
   elif test -L /usr/bin/javac; then
     # other Unix, but /usr/bin/javac is a symlink
     MYJAVAHOME=`readlink -f /usr/bin/javac | sed "s:bin/javac::"`
@@ -1844,18 +1844,14 @@ printf '%s\n' "$MYJAVAHOME"
 
 # Platform of Java
 printf 'checking JVMPLATFORM... '
-if uname | grep Darwin >config.tmp
-then
-  JVMPLATFORM="mac"
-else
-  for file in `\ls $MYJAVAHOME/include`
-  do
-    if test -d "$MYJAVAHOME/include/$file"
-    then
-      JVMPLATFORM="$file"
-    fi
-  done
-fi
+for file in `\ls $MYJAVAHOME/include`
+do
+  if test -d "$MYJAVAHOME/include/$file"
+  then
+    JVMPLATFORM="$file"
+  fi
+done
+
 printf '%s\n' "$JVMPLATFORM"
 MYCPPFLAGS="$MYCPPFLAGS -I$MYJAVAHOME/include -I$MYJAVAHOME/include/$JVMPLATFORM"
 MYCPPFLAGS="$MYCPPFLAGS -I$MYJAVAHOME/Headers -I$MYJAVAHOME/Headers/$JVMPLATFORM"
